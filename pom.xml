@@ -91,6 +91,11 @@
             <id>xenondevs</id>
             <url>https://repo.xenondevs.xyz/releases</url>
         </repository>
+        <repository>
+            <id>meta-repo</id>
+            <url>https://repo.metamc.it/repository/meta-repo/</url>
+        </repository>
+
     </repositories>
 
     <dependencies>
@@ -185,6 +190,12 @@
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>19.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.metadevs</groupId>
+            <artifactId>RedisTabAPI</artifactId>
+            <version>1.0-EXPERIMENTAL</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

@@ -13,6 +13,7 @@ depend:
 softdepend:
   - Oraxen
   - ItemsAdder
+  - RedisTab
 loadbefore:
   - CMI
   - CMILib

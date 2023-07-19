@@ -7,12 +7,14 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 @AllArgsConstructor
 public class MailCommand implements CommandExecutor, TabCompleter {
@@ -86,10 +88,11 @@ public class MailCommand implements CommandExecutor, TabCompleter {
         if (!sender.hasPermission(Permission.REDIS_CHAT_MAIL_WRITE.getPermission())) return List.of();
         if (args.length == 1) return List.of("send", "delete");
         if (args.length == 2 && args[1].equalsIgnoreCase("send")) {
-            ArrayList<String> list = new ArrayList<>();
-            list.add("*public");
-            list.addAll(mailManager.getPlugin().getPlayerListManager().getPlayerList().stream().filter(s -> s.startsWith(args[args.length - 1])).toList());
-            return list;
+
+            Set<String> players = mailManager.getPlugin().getPlayerListManager().getPlayers(sender);
+            List<String> temp = new ArrayList<>(List.of("*public"));
+            StringUtil.copyPartialMatches(args[args.length - 1], players, temp);
+            return temp;
         }
         if (args.length == 3 && args[1].equalsIgnoreCase("send")) return List.of("<aqua>Mail Object/Title</aqua>");
         return List.of();

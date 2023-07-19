@@ -8,11 +8,13 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.StringJoiner;
 
 @AllArgsConstructor
@@ -56,7 +58,8 @@ public class IgnoreCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
         if (!sender.hasPermission(Permission.REDIS_CHAT_IGNORE.getPermission())) return List.of();
         List<String> temp = new ArrayList<>(List.of("list", "all"));
-        temp.addAll(plugin.getPlayerListManager().getPlayerList().stream().filter(s -> s.startsWith(args[args.length - 1])).toList());
+        Set<String> players = plugin.getPlayerListManager().getPlayers(sender);
+        StringUtil.copyPartialMatches(args[args.length - 1], players, temp);
         return temp;
     }
 }
