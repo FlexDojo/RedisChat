@@ -28,7 +28,7 @@ public class SetItemCommand implements CommandExecutor, TabCompleter {
             plugin.getComponentProvider().sendMessage(sender, plugin.messages.missing_arguments);
             return true;
         }
-        plugin.guiSettings.setIngredient(args[0], player.getInventory().getItemInMainHand());
+        plugin.guiSettings.setIngredient(args[0], player.getInventory().getItemInHand());
         plugin.saveGuiSettings();
         plugin.getComponentProvider().sendMessage(sender, plugin.messages.itemSet);
 

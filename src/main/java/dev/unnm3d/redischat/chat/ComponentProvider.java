@@ -18,6 +18,7 @@ import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
@@ -194,14 +195,14 @@ public class ComponentProvider {
         toParseItem = toParseItem.replace("%command%", "/invshare " + player.getName() + "-item");
         Component toParseItemComponent = parse(player, toParseItem, true, false, false, this.standardTagResolver);
         if (player instanceof Player p) {
-            if (!p.getInventory().getItemInMainHand().getType().isAir()) {
-                if (p.getInventory().getItemInMainHand().getItemMeta() != null)
-                    if (p.getInventory().getItemInMainHand().getItemMeta().hasDisplayName()) {
+            if (!(p.getInventory().getItemInHand().getType() == Material.AIR)) {
+                if (p.getInventory().getItemInHand().getItemMeta() != null)
+                    if (p.getInventory().getItemInHand().getItemMeta().hasDisplayName()) {
                         toParseItemComponent = toParseItemComponent.replaceText(rTextBuilder ->
                                 rTextBuilder.matchLiteral("%item_name%")
                                         .replacement(
                                                 parse(player,
-                                                        parseLegacy(null, p.getInventory().getItemInMainHand().getItemMeta().getDisplayName()),
+                                                        parseLegacy(null, p.getInventory().getItemInHand().getItemMeta().getDisplayName()),
                                                         false,
                                                         false,
                                                         false,
@@ -212,7 +213,7 @@ public class ComponentProvider {
                                 rTextBuilder.matchLiteral("%item_name%")
                                         .replacement(
                                                 parse(player,
-                                                        p.getInventory().getItemInMainHand().getType().name().toLowerCase().replace("_", " "),
+                                                        p.getInventory().getItemInHand().getType().name().toLowerCase().replace("_", " "),
                                                         false,
                                                         false,
                                                         false,

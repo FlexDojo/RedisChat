@@ -58,7 +58,7 @@ public final class GuiSettings {
     }
 
     private ItemStack getPrivateButton() {
-        ItemStack item = new ItemStack(Material.WRITABLE_BOOK);
+        ItemStack item = new ItemStack(Material.STONE);
         ItemMeta im = item.getItemMeta();
         if (im == null) return item;
         im.setDisplayName("§cPrivate");

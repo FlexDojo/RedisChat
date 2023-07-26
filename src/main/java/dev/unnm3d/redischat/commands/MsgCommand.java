@@ -53,7 +53,7 @@ public class MsgCommand implements CommandExecutor, TabCompleter {
                     plugin.getRedisDataManager().addInventory(player.getName(), player.getInventory().getContents());
                 }
                 if (message.contains("<item>")) {
-                    plugin.getRedisDataManager().addItem(player.getName(), player.getInventory().getItemInMainHand());
+                    plugin.getRedisDataManager().addItem(player.getName(), player.getInventory().getItemInHand());
                 }
                 if (message.contains("<ec>")) {
                     plugin.getRedisDataManager().addEnderchest(player.getName(), player.getEnderChest().getContents());
