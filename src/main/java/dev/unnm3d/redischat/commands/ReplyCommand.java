@@ -5,6 +5,7 @@ import dev.unnm3d.redischat.RedisChat;
 import dev.unnm3d.redischat.chat.ChatMessageInfo;
 import dev.unnm3d.redischat.configs.Config;
 import lombok.AllArgsConstructor;
+import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -47,7 +48,28 @@ public class ReplyCommand implements CommandExecutor {
                 List<Config.ChatFormat> chatFormatList = plugin.config.getChatFormats(sender);
                 if (chatFormatList.isEmpty()) return;
 
-                Component formatted = plugin.getComponentProvider().parse(sender, chatFormatList.get(0).private_format().replace("%receiver%", receiver.get()).replace("%sender%", sender.getName()));
+//                Component formatted = plugin.getComponentProvider().parse(sender, chatFormatList.get(0).private_format().replace("%receiver%", receiver.get()).replace("%sender%", sender.getName()));
+                String finalReceiverName = receiver.get();
+                String finalSenderName = sender.getName();
+
+                String receiverPlaceholder = "%disguise_replace-name_" + finalReceiverName + "%";
+                String senderPlaceholder = "%disguise_replace-name_" + finalSenderName + "%";
+
+
+                Player p = (Player) sender;
+                String tmp = PlaceholderAPI.setPlaceholders(p, receiverPlaceholder);
+                if(!tmp.equals(receiverPlaceholder)) {
+                    finalReceiverName = tmp;
+                }
+
+                tmp = PlaceholderAPI.setPlaceholders(p, senderPlaceholder);
+                if(!tmp.equals(senderPlaceholder)) {
+                    finalSenderName = tmp;
+                }
+
+
+                Component formatted = plugin.getComponentProvider().parse(sender, chatFormatList.get(0).private_format().replace("%receiver%", finalReceiverName).replace("%sender%", finalSenderName));
+
 
                 //Check for minimessage tags permission
                 boolean parsePlaceholders = true;

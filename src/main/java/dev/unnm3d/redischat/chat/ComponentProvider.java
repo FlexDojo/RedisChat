@@ -244,9 +244,16 @@ public class ComponentProvider {
 
     public String parseMentions(String text, Config.ChatFormat format) {
         String toParse = text;
+        if(true) return toParse;
         for (String playerName : plugin.getPlayerListManager().getPlayerList()) {
-            Pattern p = Pattern.compile("(^" + playerName + "|" + playerName + "$|\\s" + playerName + "\\s)"); //
-            Matcher m = p.matcher(text);
+            boolean isBedrock = false;
+            if (text.startsWith("*") && playerName.startsWith("*")) {
+                isBedrock = true;
+            }
+            String finalPlayerName = playerName.substring(isBedrock ? 1 : 0);
+            String finalText = text.substring(isBedrock ? 1 : 0);
+            Pattern p = Pattern.compile("(^" + finalPlayerName + "|" + finalPlayerName + "$|\\s" + finalPlayerName + "\\s)"); //
+            Matcher m = p.matcher(finalText);
             if (m.find()) {
                 String replacing = m.group();
                 replacing = replacing.replace(playerName, format.mention_format().replace("%player%", playerName));
@@ -358,9 +365,33 @@ public class ComponentProvider {
             if (p.isOnline()) {
                 List<Config.ChatFormat> chatFormatList = plugin.config.getChatFormats(p);
                 if (chatFormatList.isEmpty()) return;
-                Component formatted = parse(null, chatFormatList.get(0).receive_private_format()
-                        .replace("%receiver%", chatMessageInfo.getReceiverName())
-                        .replace("%sender%", chatMessageInfo.getSenderName()));
+
+
+                String finalReceiverName = chatMessageInfo.getReceiverName();
+                String finalSenderName = chatMessageInfo.getSenderName();
+
+                String receiverPlaceholder = "%disguise_replace-name_" + finalReceiverName + "%";
+                String senderPlaceholder = "%disguise_replace-name_" + finalSenderName + "%";
+
+
+                String tmp = PlaceholderAPI.setPlaceholders(p, receiverPlaceholder);
+                if (!tmp.equals(receiverPlaceholder)) {
+                    finalReceiverName = tmp;
+                }
+
+                tmp = PlaceholderAPI.setPlaceholders(p, senderPlaceholder);
+                if (!tmp.equals(senderPlaceholder)) {
+                    finalSenderName = tmp;
+                }
+
+                String text = chatFormatList.get(0).receive_private_format()
+                        .replace("%receiver%", finalReceiverName)
+                        .replace("%sender%", finalSenderName);
+
+                PlaceholderAPI.setPlaceholders(p, text);
+
+
+                Component formatted = parse(null, text);
                 Component toBeReplaced = parse(p, chatMessageInfo.getMessage(), false, false, false, this.standardTagResolver);
                 //Put message into format
                 formatted = formatted.replaceText(

@@ -5,6 +5,7 @@ import dev.unnm3d.redischat.RedisChat;
 import dev.unnm3d.redischat.chat.ChatMessageInfo;
 import dev.unnm3d.redischat.configs.Config;
 import lombok.AllArgsConstructor;
+import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
@@ -16,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,8 +27,20 @@ public class MsgCommand implements CommandExecutor, TabCompleter {
 
     public void sendMsg(String[] args, CommandSender sender, String receiverName) {
 
+        String receiverPlaceholder = "%disguise_replace-name_" + receiverName + "%";
+
+
         if (!plugin.getPlayerListManager().getPlayerList().contains(receiverName)) {
-            plugin.messages.sendMessage(sender, plugin.messages.player_not_online.replace("%player%", receiverName));
+            String finalReceiverName = receiverName;
+
+            if(sender instanceof  Player player) {
+                String tmp = PlaceholderAPI.setPlaceholders(player, receiverPlaceholder);
+                if(!tmp.equals(receiverPlaceholder)) {
+                    finalReceiverName = tmp;
+                }
+            }
+
+            plugin.messages.sendMessage(sender, plugin.messages.player_not_online.replace("%player%", finalReceiverName));
             return;
         }
 
@@ -36,7 +50,27 @@ public class MsgCommand implements CommandExecutor, TabCompleter {
             List<Config.ChatFormat> chatFormatList = plugin.config.getChatFormats(sender);
             if (chatFormatList.isEmpty()) return;
 
-            Component formatted = plugin.getComponentProvider().parse(sender, chatFormatList.get(0).private_format().replace("%receiver%", receiverName).replace("%sender%", sender.getName()));
+            String finalSenderName = sender.getName();
+            String finalReceiverName = receiverName;
+
+            String senderPlaceholder = "%disguise_replace-name_" + sender.getName() + "%";
+
+
+            if(sender instanceof Player p) {
+                String tmp = PlaceholderAPI.setPlaceholders(p, receiverPlaceholder);
+                if(!tmp.equals(receiverPlaceholder)) {
+                    finalReceiverName = tmp;
+                }
+
+                tmp = PlaceholderAPI.setPlaceholders(p, senderPlaceholder);
+                if(!tmp.equals(senderPlaceholder)) {
+                    finalSenderName = tmp;
+                }
+            }
+
+
+
+            Component formatted = plugin.getComponentProvider().parse(sender, chatFormatList.get(0).private_format().replace("%receiver%", finalReceiverName).replace("%sender%", finalSenderName));
 
             //Check for minimessage tags permission
             boolean parsePlaceholders = true;
@@ -100,6 +134,6 @@ public class MsgCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
         if (args.length == 0 || !sender.hasPermission(Permission.REDIS_CHAT_MESSAGE.getPermission())) return List.of();
-        return plugin.getPlayerListManager().getPlayerList().stream().filter(s -> s.startsWith(args[args.length - 1])).toList();
+        return plugin.getPlayerListManager().getPlayerList().stream().filter(s -> s.toLowerCase().startsWith(args[args.length - 1].toLowerCase())).toList();
     }
 }
