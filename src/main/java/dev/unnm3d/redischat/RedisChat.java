@@ -9,11 +9,14 @@ import dev.unnm3d.redischat.commands.*;
 import dev.unnm3d.redischat.configs.Config;
 import dev.unnm3d.redischat.configs.GuiSettings;
 import dev.unnm3d.redischat.configs.Messages;
+import dev.unnm3d.redischat.integrations.OraxenTagResolver;
+import dev.unnm3d.redischat.integrations.VanishIntegration;
 import dev.unnm3d.redischat.mail.MailCommand;
 import dev.unnm3d.redischat.mail.MailManager;
 import dev.unnm3d.redischat.moderation.SpyChatCommand;
 import dev.unnm3d.redischat.moderation.SpyManager;
 import dev.unnm3d.redischat.moderation.StaffChat;
+import dev.unnm3d.redischat.redis.DataManager;
 import dev.unnm3d.redischat.redis.RedisDataManager;
 import dev.unnm3d.redischat.task.AnnounceManager;
 import dev.unnm3d.redischat.utils.AdventureWebuiEditorAPI;
@@ -38,7 +41,7 @@ public final class RedisChat extends JavaPlugin {
     public GuiSettings guiSettings;
     private ChatListener chatListener;
     @Getter
-    private RedisDataManager redisDataManager;
+    private DataManager redisDataManager;
     @Getter
     private PlayerListManager playerListManager;
     @Getter
@@ -58,7 +61,6 @@ public final class RedisChat extends JavaPlugin {
         //Redis section
         this.redisDataManager = new RedisDataManager(RedisClient.create(config.redis.redisUri()), this);
         getLogger().info("Redis URI: " + config.redis.redisUri());
-        this.redisDataManager.listenChatPackets();
 
         //Chat section
         this.componentProvider = new ComponentProvider(this);
@@ -104,6 +106,14 @@ public final class RedisChat extends JavaPlugin {
         loadCommand("invshare", new InvShareCommand(this), null);
 
         new Metrics(this, 17678);
+
+        //Integration section
+        if (getServer().getPluginManager().getPlugin("Oraxen") != null) {
+            getLogger().info("Oraxen found, enabling integration");
+            componentProvider.addResolverIntegration(new OraxenTagResolver());
+        }
+        playerListManager.addVanishIntegration(new VanishIntegration() {
+        }); //PremiumVanish standard
     }
 
 

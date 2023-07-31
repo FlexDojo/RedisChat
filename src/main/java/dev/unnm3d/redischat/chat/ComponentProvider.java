@@ -3,6 +3,7 @@ package dev.unnm3d.redischat.chat;
 import dev.unnm3d.redischat.Permission;
 import dev.unnm3d.redischat.RedisChat;
 import dev.unnm3d.redischat.configs.Config;
+import dev.unnm3d.redischat.integrations.TagResolverIntegration;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import me.clip.placeholderapi.PlaceholderAPI;
@@ -18,6 +19,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
@@ -41,6 +43,7 @@ public class ComponentProvider {
     @Getter
     private static ComponentProvider instance;
     private final List<TagResolver.Single> customPlaceholderResolvers;
+    private final List<TagResolverIntegration> tagResolverIntegrationList;
 
     public ComponentProvider(RedisChat plugin) {
         instance = this;
@@ -53,7 +56,11 @@ public class ComponentProvider {
                         Placeholder.component(entry.getKey(), MiniMessage.miniMessage().deserialize(entry.getValue()))
                 ).toList();
         this.standardTagResolver = StandardTags.defaults();
+        this.tagResolverIntegrationList = new ArrayList<>();
+    }
 
+    public void addResolverIntegration(TagResolverIntegration integration) {
+        this.tagResolverIntegrationList.add(integration);
     }
 
     public BaseComponent[] toBaseComponent(Component component) {
@@ -86,7 +93,7 @@ public class ComponentProvider {
         }
 
         Component finalComponent = parsePlaceholders ?
-                parsePlaceholders(player, text, tagResolvers) :
+                parsePlaceholders(player, parseResolverIntegrations(text), tagResolvers) :
                 miniMessage.deserialize(text, tagResolvers);
 
         if (parsedLinks.getValue() != null) {
@@ -136,7 +143,6 @@ public class ComponentProvider {
      */
     public Component parsePlaceholders(CommandSender cmdSender, String text, TagResolver[] tagResolvers) {
         final String[] stringPlaceholders = text.split("%");
-
         final LinkedHashMap<String, Component> placeholders = new LinkedHashMap<>();
         int placeholderStep = 1;
         // we need to split the text by % and then check if the placeholder is a placeholder or not
@@ -236,7 +242,8 @@ public class ComponentProvider {
 
     public String parseMentions(String text, Config.ChatFormat format) {
         String toParse = text;
-        for (String playerName : plugin.getPlayerListManager().getPlayers(null)) {
+        for (String playerName : plugin.getPlayerListManager().getPlayerList()) {
+            playerName = playerName.replace("*", "\\*");
             Pattern p = Pattern.compile("(^" + playerName + "|" + playerName + "$|\\s" + playerName + "\\s)"); //
             Matcher m = p.matcher(text);
             if (m.find()) {
@@ -267,6 +274,13 @@ public class ComponentProvider {
         if (plugin.config.debug)
             Bukkit.getLogger().info("links: " + text);
         return new AbstractMap.SimpleEntry<>(text, linkComponent);
+    }
+
+    private String parseResolverIntegrations(String text) {
+        for (TagResolverIntegration resolver : this.tagResolverIntegrationList) {
+            text = resolver.parseTags(text).replace("\\", "");
+        }
+        return text;
     }
 
     public String sanitize(String message) {
@@ -300,32 +314,41 @@ public class ComponentProvider {
 
     public void sendGenericChat(ChatMessageInfo chatMessageInfo) {
         String multicastPermission = chatMessageInfo.getReceiverName().charAt(0) == '@' ? chatMessageInfo.getReceiverName().substring(1) : null;
+        Component formattedComponent = MiniMessage.miniMessage().deserialize(chatMessageInfo.getFormatting()).replaceText(
+                builder -> builder.matchLiteral("%message%").replacement(
+                        MiniMessage.miniMessage().deserialize(chatMessageInfo.getMessage())
+                )
+        );
+        audiences.sender(plugin.getServer().getConsoleSender()).sendMessage(formattedComponent);//send to console for logging purposes
+
         for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
             if (multicastPermission != null) {
                 if (!onlinePlayer.hasPermission(multicastPermission)) continue;
             }
-            sendComponentOrCache(onlinePlayer, MiniMessage.miniMessage().deserialize(chatMessageInfo.getMessage()));
+            if (chatMessageInfo.getMessage().contains(onlinePlayer.getName())) {
+                onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.BLOCK_NOTE_BLOCK_GUITAR, 1, 2.0f);
+            }
+            sendComponentOrCache(onlinePlayer, formattedComponent);
         }
     }
 
     /**
      * Sends a spy message to watchers
      *
-     * @param receiverName The name of the receiver of the message
-     * @param senderName   The name of the sender of the message
-     * @param watcher      The player who is spying the message
-     * @param deserialize  The message to send
+     * @param chatMessageInfo The chat content to send
+     * @param watcher         The player who is spying the message
      */
-    public void sendSpyChat(String receiverName, String senderName, Player watcher, String deserialize) {
-        Component formatted = MiniMessage.miniMessage().deserialize(plugin.messages.spychat_format.replace("%receiver%", receiverName).replace("%sender%", senderName));
-
-        //Parse into minimessage (placeholders, tags and mentions)
-        Component toBeReplaced = parse(deserialize);
-        //Put message into format
-        formatted = formatted.replaceText(
-                builder -> builder.matchLiteral("%message%").replacement(toBeReplaced)
-        );
-        sendComponentOrCache(watcher, formatted);
+    public void sendSpyChat(ChatMessageInfo chatMessageInfo, Player watcher) {
+        Component finalFormatted = MiniMessage.miniMessage().deserialize(
+                        plugin.messages.spychat_format
+                                .replace("%receiver%", chatMessageInfo.getReceiverName())
+                                .replace("%sender%", chatMessageInfo.getSenderName()))
+                .replaceText(
+                        builder -> builder.matchLiteral("%message%").replacement(
+                                MiniMessage.miniMessage().deserialize(chatMessageInfo.getMessage())
+                        )
+                );
+        sendComponentOrCache(watcher, finalFormatted);
     }
 
     /**
