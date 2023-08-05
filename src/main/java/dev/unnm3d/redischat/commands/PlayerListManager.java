@@ -3,10 +3,14 @@ package dev.unnm3d.redischat.commands;
 import dev.unnm3d.redischat.RedisChat;
 import dev.unnm3d.redischat.api.VanishIntegration;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.Nullable;
+import org.metadevs.redistab.api.RedisTabAPI;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,10 +19,13 @@ public class PlayerListManager {
     private final BukkitTask task;
     private final ConcurrentHashMap<String, Long> playerList;
     private final List<VanishIntegration> vanishIntegrations;
+    private final RedisChat plugin;
+    private RedisTabAPI redisTabAPI;
 
     public PlayerListManager(RedisChat plugin) {
         this.playerList = new ConcurrentHashMap<>();
         this.vanishIntegrations = new ArrayList<>();
+        this.plugin = plugin;
         this.task = new BukkitRunnable() {
             @Override
             public void run() {
@@ -34,7 +41,14 @@ public class PlayerListManager {
 
                 tempList.forEach(s -> playerList.put(s, System.currentTimeMillis()));
             }
-        }.runTaskTimerAsynchronously(plugin, 0, 100);//5 seconds
+        }.runTaskTimerAsynchronously(plugin, 0, 200);//10 seconds
+        loadRedisTabAPI();
+    }
+
+    private void loadRedisTabAPI() {
+        if (Bukkit.getPluginManager().isPluginEnabled("RedisTab")) {
+            redisTabAPI = Bukkit.getServicesManager().load(RedisTabAPI.class);
+        }
     }
 
     public void updatePlayerList(List<String> inPlayerList) {
@@ -49,8 +63,31 @@ public class PlayerListManager {
         vanishIntegrations.add(vanishIntegration);
     }
 
-    public Set<String> getPlayerList() {
-        return playerList.keySet();
+    public boolean isNotVisible(CommandSender sender, String name) {
+        if (!(sender instanceof Player player)) {
+            return false;
+        }
+        if (redisTabAPI != null) {
+            return !redisTabAPI.canSee(player.getUniqueId(), name);
+        } else {
+            return false;
+        }
+    }
+
+    public Set<String> getPlayers(@Nullable CommandSender sender) {
+        if (sender == null) {
+            Set<String> players = new HashSet<>(redisTabAPI.getTotalPlayers());
+            redisTabAPI.getVanishedPlayers().forEach(players::remove);
+            return players;
+        } else if (!(sender instanceof Player player)) {
+            return new HashSet<>(redisTabAPI.getTotalPlayers());
+        } else if (redisTabAPI.canSeeVanished(player.getUniqueId())) {
+            return new HashSet<>(redisTabAPI.getTotalPlayers());
+        } else {
+            Set<String> players = new HashSet<>(redisTabAPI.getTotalPlayers());
+            redisTabAPI.getVanishedPlayers().forEach(players::remove);
+            return players;
+        }
     }
 
     public void stop() {

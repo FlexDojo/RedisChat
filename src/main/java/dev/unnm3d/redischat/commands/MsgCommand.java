@@ -13,11 +13,14 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 @AllArgsConstructor
 public class MsgCommand implements CommandExecutor, TabCompleter {
@@ -25,7 +28,7 @@ public class MsgCommand implements CommandExecutor, TabCompleter {
 
     public void sendMsg(String[] args, CommandSender sender, String receiverName) {
 
-        if (!plugin.getPlayerListManager().getPlayerList().contains(receiverName)) {
+        if (plugin.getPlayerListManager().isNotVisible(sender, receiverName)) {
             plugin.messages.sendMessage(sender, plugin.messages.player_not_online.replace("%player%", receiverName));
             return;
         }
@@ -101,6 +104,11 @@ public class MsgCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
         if (args.length == 0 || !sender.hasPermission(Permission.REDIS_CHAT_MESSAGE.getPermission())) return List.of();
-        return plugin.getPlayerListManager().getPlayerList().stream().filter(s -> s.toLowerCase().startsWith(args[args.length - 1])).toList();
+        if(args.length > 1) return List.of();
+        Set<String> players = plugin.getPlayerListManager().getPlayers(sender);
+        List<String> temp = new ArrayList<>();
+        StringUtil.copyPartialMatches(args[args.length - 1], players, temp);
+        temp.remove(sender.getName());
+        return temp;
     }
 }
