@@ -10,6 +10,7 @@ public record ChatFormat(
         @NotNull String inventory_format,
         @NotNull String item_format,
         @NotNull String enderchest_format,
+        @NotNull String shulkerbox_format,
         @NotNull String mention_format,
         @NotNull String link_format,
         @NotNull String staff_chat_format) {

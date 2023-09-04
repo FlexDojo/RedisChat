@@ -186,6 +186,16 @@ public class H2SQLDataManager extends SQLDataManager {
     }
 
     @Override
+    public void addShulkerBox(@NotNull String name, ItemStack shulkerBox) {
+
+    }
+
+    @Override
+    public CompletionStage<ItemStack> getPlayerShulkerBox(@NotNull String playerName) {
+        return null;
+    }
+
+    @Override
     public CompletionStage<Boolean> toggleIgnoring(@NotNull String playerName, @NotNull String ignoringName) {
         return isIgnoring(playerName, ignoringName).thenApply(isIgnoring -> {
             try (Connection connection = getConnection()) {

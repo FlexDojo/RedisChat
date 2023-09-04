@@ -16,11 +16,14 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 @AllArgsConstructor
 public class ChatListener implements Listener {
     private final RedisChat plugin;
     private final StaffChat staffChat;
+    public static final Map<String, String> placeholders = Map.of("[i]", "<item>", "[item]", "<item>", "[ec]", "<ec>", "[inv]", "<inv>", "[shulker]", "<shulker>");
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onChat(AsyncPlayerChatEvent event) {
@@ -52,6 +55,13 @@ public class ChatListener implements Listener {
         Component formatted = plugin.getComponentProvider().parse(event.getPlayer(), chatFormatList.get(0).format(), true, true, true);//Parse format without %message%
         //Check for minimessage tags permission
         String message = event.getMessage();
+
+        AtomicReference<String> finalMessage = new AtomicReference<>(message);
+
+        placeholders.forEach((key, value) -> finalMessage.set(finalMessage.get().replace(key, value)));
+
+        message = finalMessage.get();
+
         boolean parsePlaceholders = true;
         if (!event.getPlayer().hasPermission(Permission.REDIS_CHAT_USE_FORMATTING.getPermission())) {
             message = plugin.getComponentProvider().purgeTags(message);//Remove all minimessage tags
@@ -76,6 +86,9 @@ public class ChatListener implements Listener {
         }
         if (message.contains("<ec>")) {
             plugin.getDataManager().addEnderchest(event.getPlayer().getName(), event.getPlayer().getEnderChest().getContents());
+        }
+        if(message.contains("<shulker>")) {
+            plugin.getDataManager().addShulkerBox(event.getPlayer().getName(), event.getPlayer().getInventory().getItemInMainHand());
         }
         totalElapsed += debug("Inv upload timing: %time%ms", init);
         init = System.currentTimeMillis();

@@ -57,6 +57,7 @@ public final class Config {
             "<click:run_command:%command%>[Open the inventory of %player%]</click>",
             "<click:run_command:%command%>[%item_name% of %player%]</click>",
             "<click:run_command:%command%>[Open the enderchest of %player%]</click>",
+            "<click:run_command:%command%>[Open %shulker_name% of %player%]</click>",
             "<aqua>@%player%</aqua>",
             "<bold><click:open_url:%link%>[Click to open URL (be careful)]</click></bold>",
             "<gold>StaffChat <dark_gray>» <white>%message%"
@@ -78,6 +79,8 @@ public final class Config {
     public String item_title = "Item of %player%";
     @Comment({"Title of the ShowEnderchest GUI"})
     public String ec_title = "Enderchest of %player%";
+    @Comment({"Title of the ShowShulker GUI"})
+    public String shulker_title = "Shulker of %player%";
     @Comment("There are some others chat formats, like broadcast and clear chat messages")
     public String broadcast_format = "<red>Announce <dark_gray>» <white>%message%";
     @Comment("This message will be sent to all players when the chat is cleared")
@@ -102,6 +105,7 @@ public final class Config {
     public List<String> disabledCommands = List.of();
     @Comment("Toggle debug mode (by default is false)")
     public boolean debug = false;
+
 
 
     public record RedisSettings(String host, int port, String user, String password, int database, int timeout,

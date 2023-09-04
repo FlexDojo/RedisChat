@@ -1,5 +1,6 @@
 package dev.unnm3d.redischat.chat;
 
+import com.google.common.base.Strings;
 import dev.unnm3d.redischat.Permission;
 import dev.unnm3d.redischat.RedisChat;
 import dev.unnm3d.redischat.api.RedisChatAPI;
@@ -14,12 +15,11 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.minimessage.tag.standard.StandardTags;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Sound;
+import org.bukkit.*;
+import org.bukkit.block.ShulkerBox;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.meta.BlockStateMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -163,17 +163,28 @@ public class ComponentProvider extends RedisChatAPI {
 
         String toParseItem = chatFormat.item_format();
         toParseItem = toParseItem.replace("%player%", player.getName());
-        toParseItem = toParseItem.replace("%command%", "/invshare " + player.getName() + "-item");
+
+        boolean isPlayer = player instanceof Player;
+        boolean isPlayerWithItem = isPlayer && !((Player) player).getInventory().getItemInMainHand().getType().isAir();
+
+        if (isPlayerWithItem) {
+            toParseItem = toParseItem.replace("%command%", "/invshare " + player.getName() + "-item");
+        } else {
+            toParseItem = toParseItem.replace("%command%", "");
+            toParseItem = toParseItem.replace("%item_name%", "Vuoto");
+        }
+
+
         Component toParseItemComponent = parse(player, toParseItem, true, false, false, this.standardTagResolver);
         if (player instanceof Player p) {
-            if (!p.getInventory().getItemInMainHand().getType().isAir()) {
+            if (isPlayerWithItem) {
                 if (p.getInventory().getItemInMainHand().getItemMeta() != null)
                     if (p.getInventory().getItemInMainHand().getItemMeta().hasDisplayName()) {
                         toParseItemComponent = toParseItemComponent.replaceText(rTextBuilder ->
                                 rTextBuilder.matchLiteral("%item_name%")
                                         .replacement(
                                                 parse(player,
-                                                        parseLegacy(p.getInventory().getItemInMainHand().getItemMeta().getDisplayName()),
+                                                        parseLegacy(sanitize(p.getInventory().getItemInMainHand().getItemMeta().getDisplayName())),
                                                         false,
                                                         false,
                                                         false,
@@ -191,11 +202,6 @@ public class ComponentProvider extends RedisChatAPI {
                                                         this.standardTagResolver))
                         );
                     }
-            } else {
-                toParseItemComponent = toParseItemComponent.replaceText(rTextBuilder ->
-                        rTextBuilder.matchLiteral("%item_name%")
-                                .replacement("Nothing")
-                );
             }
         }
         TagResolver item = Placeholder.component("item", toParseItemComponent);
@@ -205,11 +211,46 @@ public class ComponentProvider extends RedisChatAPI {
         toParseEnderChest = toParseEnderChest.replace("%command%", "/invshare " + player.getName() + "-enderchest");
         TagResolver ec = Placeholder.component("ec", parse(player, toParseEnderChest, true, false, false, this.standardTagResolver));
 
+        String toParseShulker = chatFormat.shulkerbox_format();
+        toParseShulker = toParseShulker.replace("%player%", player.getName());
+
+        isPlayerWithItem = isPlayer && ((Player) player).getInventory().getItemInMainHand().getType().name().endsWith("SHULKER_BOX");
+
+        if (isPlayerWithItem) {
+            toParseShulker = toParseShulker.replace("%command%", "/invshare " + player.getName() + "-shulker");
+        } else {
+            toParseShulker = toParseShulker.replace("%command%", "");
+            toParseShulker = toParseShulker.replace("%shulker_name%", "Vuoto");
+        }
+
+        Component toParseShulkerComponent = parse(player, toParseShulker, true, false, false, this.standardTagResolver);
+        if (player instanceof Player p) {
+            if (isPlayerWithItem) {
+                BlockStateMeta meta = (BlockStateMeta) p.getInventory().getItemInMainHand().getItemMeta();
+                String shulkerName = meta.hasDisplayName() ? meta.getDisplayName() : "Shulker Box";
+                toParseShulkerComponent = toParseShulkerComponent.replaceText(rTextBuilder ->
+                        rTextBuilder.matchLiteral("%shulker_name%")
+                                .replacement(
+                                        parse(player,
+                                                parseLegacy(sanitize(shulkerName)),
+                                                false,
+                                                false,
+                                                false,
+                                                this.standardTagResolver))
+                );
+            }
+        }
+
+
+        TagResolver shulker = Placeholder.component("shulker", toParseShulkerComponent);
+
+
         customPlaceholderResolvers.forEach(builder::resolver);
 
         builder.resolver(inv);
         builder.resolver(item);
         builder.resolver(ec);
+        builder.resolver(shulker);
         return builder.build();
     }
 
@@ -260,7 +301,7 @@ public class ComponentProvider extends RedisChatAPI {
     @Override
     public @NotNull String sanitize(@NotNull String message) {
         for (String regex : plugin.config.regex_blacklist) {
-            message = message.replaceAll(regex, "<obf>swear</obf>");
+            message = message.replaceAll(regex, "*****");//"<obf>swear</obf>");
         }
         return message;
     }

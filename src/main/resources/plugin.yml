@@ -50,7 +50,6 @@ commands:
     permission: redischat.broadcast
   clearchat:
     description: Clears the chat
-    aliases: [cc]
     usage: /clearchat
     permission: redischat.clearchat
   invshare:

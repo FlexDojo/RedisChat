@@ -11,6 +11,7 @@ public enum DataKeys {
     INVSHARE_ITEM("rchat:item"),
     INVSHARE_INVENTORY("rchat:inventory"),
     INVSHARE_ENDERCHEST("rchat:enderchest"),
+    INVSHARE_SHULKERBOX("rchat:shulkerbox"),
     SPYING_LIST("rchat:spying"),
     PRIVATE_MAIL_PREFIX("rmail:"),
     PUBLIC_MAIL("rmail:public"),

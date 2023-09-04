@@ -38,11 +38,14 @@ public interface DataManager {
 
     void addEnderchest(@NotNull String name, ItemStack[] inv);
 
+    void addShulkerBox(@NotNull String name, ItemStack shulkerBox);
+
     CompletionStage<ItemStack> getPlayerItem(@NotNull String playerName);
 
     CompletionStage<ItemStack[]> getPlayerInventory(@NotNull String playerName);
 
     CompletionStage<ItemStack[]> getPlayerEnderchest(@NotNull String playerName);
+    CompletionStage<ItemStack> getPlayerShulkerBox(@NotNull String playerName);
 
     CompletionStage<List<Mail>> getPlayerPrivateMail(@NotNull String playerName);
 

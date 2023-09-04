@@ -3,6 +3,7 @@ package dev.unnm3d.redischat.commands;
 import dev.unnm3d.redischat.Permission;
 import dev.unnm3d.redischat.RedisChat;
 import dev.unnm3d.redischat.chat.ChatFormat;
+import dev.unnm3d.redischat.chat.ChatListener;
 import dev.unnm3d.redischat.chat.ChatMessageInfo;
 import lombok.AllArgsConstructor;
 import net.kyori.adventure.text.Component;
@@ -17,6 +18,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 @AllArgsConstructor
 public class ReplyCommand implements CommandExecutor {
@@ -47,6 +49,12 @@ public class ReplyCommand implements CommandExecutor {
                 List<ChatFormat> chatFormatList = plugin.config.getChatFormats(sender);
                 if (chatFormatList.isEmpty()) return;
 
+                AtomicReference<String> finalMessage = new AtomicReference<>(message);
+
+                ChatListener.placeholders.forEach((key, value) -> finalMessage.set(finalMessage.get().replace(key, value)));
+
+                message = finalMessage.get();
+
                 Component formatted = plugin.getComponentProvider().parse(sender, chatFormatList.get(0).private_format().replace("%receiver%", receiver.get()).replace("%sender%", sender.getName()));
 
                 //Check for minimessage tags permission
@@ -57,6 +65,21 @@ public class ReplyCommand implements CommandExecutor {
                 }
                 // remove blacklisted stuff
                 message = plugin.getComponentProvider().sanitize(message);
+
+
+                Player player = (Player) sender;
+                if (message.contains("<inv>")) {
+                    plugin.getDataManager().addInventory(player.getName(), player.getInventory().getContents());
+                }
+                if (message.contains("<item>")) {
+                    plugin.getDataManager().addItem(player.getName(), player.getInventory().getItemInMainHand());
+                }
+                if (message.contains("<ec>")) {
+                    plugin.getDataManager().addEnderchest(player.getName(), player.getEnderChest().getContents());
+                }
+                if (message.contains("<shulker>")) {
+                    plugin.getDataManager().addShulkerBox(player.getName(), player.getInventory().getItemInMainHand());
+                }
 
 
                 //Parse into minimessage (placeholders, tags and mentions)

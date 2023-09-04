@@ -3,6 +3,7 @@ package dev.unnm3d.redischat.commands;
 import dev.unnm3d.redischat.Permission;
 import dev.unnm3d.redischat.RedisChat;
 import dev.unnm3d.redischat.chat.ChatFormat;
+import dev.unnm3d.redischat.chat.ChatListener;
 import dev.unnm3d.redischat.chat.ChatMessageInfo;
 import lombok.AllArgsConstructor;
 import net.kyori.adventure.text.Component;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 @AllArgsConstructor
 public class MsgCommand implements CommandExecutor, TabCompleter {
@@ -38,6 +40,12 @@ public class MsgCommand implements CommandExecutor, TabCompleter {
             String message = String.join(" ", args);
             List<ChatFormat> chatFormatList = plugin.config.getChatFormats(sender);
             if (chatFormatList.isEmpty()) return;
+
+            AtomicReference<String> finalMessage = new AtomicReference<>(message);
+
+            ChatListener.placeholders.forEach((key, value) -> finalMessage.set(finalMessage.get().replace(key, value)));
+
+            message = finalMessage.get();
 
             Component formatted = plugin.getComponentProvider().parse(sender, chatFormatList.get(0).private_format().replace("%receiver%", receiverName).replace("%sender%", sender.getName()));
 
@@ -60,6 +68,9 @@ public class MsgCommand implements CommandExecutor, TabCompleter {
                 }
                 if (message.contains("<ec>")) {
                     plugin.getDataManager().addEnderchest(player.getName(), player.getEnderChest().getContents());
+                }
+                if (message.contains("<shulker>")) {
+                    plugin.getDataManager().addShulkerBox(player.getName(), player.getInventory().getItemInMainHand());
                 }
             }
 

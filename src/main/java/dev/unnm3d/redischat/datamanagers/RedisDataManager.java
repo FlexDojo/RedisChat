@@ -316,6 +316,31 @@ public class RedisDataManager extends RedisAbstract implements DataManager {
     }
 
     @Override
+    public void addShulkerBox(@NotNull String name, ItemStack shulkerBox) {
+        getConnectionAsync(connection ->
+                connection.hset(INVSHARE_SHULKERBOX.toString(), name, serialize(shulkerBox))
+                        .thenApply(response -> {
+                            if (plugin.config.debug) {
+                                plugin.getLogger().info("12 Added shulkerbox for " + name);
+                            }
+                            scheduleConnection(scheduled -> {
+                                scheduled.async().hdel(INVSHARE_SHULKERBOX.toString(), name).thenAccept(response2 -> {
+                                    if (plugin.config.debug) {
+                                        plugin.getLogger().warning("13 Removing shulkerbox");
+                                    }
+                                });
+                                return null;
+                            }, 120, TimeUnit.SECONDS);
+                            return response;
+                        }).exceptionally(throwable -> {
+                            throwable.printStackTrace();
+                            plugin.getLogger().warning("Error adding shulkerbox");
+                            return null;
+                        })
+        );
+    }
+
+    @Override
     public CompletionStage<ItemStack> getPlayerItem(@NotNull String playerName) {
         return getConnectionAsync(connection ->
                 connection.hget(INVSHARE_ITEM.toString(), playerName)
@@ -365,6 +390,25 @@ public class RedisDataManager extends RedisAbstract implements DataManager {
                         .exceptionally(throwable -> {
                             throwable.printStackTrace();
                             plugin.getLogger().warning("Error getting ec");
+                            return null;
+                        }));
+    }
+
+    @Override
+    public CompletionStage<ItemStack> getPlayerShulkerBox(@NotNull String playerName) {
+        return getConnectionAsync(connection ->
+                connection.hget(INVSHARE_SHULKERBOX.toString(), playerName)
+                        .thenApply(serializedInv -> {
+                            ItemStack[] itemStacks = deserialize(serializedInv == null ? "" : serializedInv);
+                            if (plugin.config.debug) {
+                                plugin.getLogger().info("14 Got shulkerbox for " + playerName + " is " + (itemStacks.length != 0 ? itemStacks[0].toString() : "null"));
+                            }
+                            if (itemStacks.length == 0) return new ItemStack(Material.AIR);
+                            return itemStacks[0];
+                        })
+                        .exceptionally(throwable -> {
+                            throwable.printStackTrace();
+                            plugin.getLogger().warning("Error getting shulkerbox");
                             return null;
                         }));
     }

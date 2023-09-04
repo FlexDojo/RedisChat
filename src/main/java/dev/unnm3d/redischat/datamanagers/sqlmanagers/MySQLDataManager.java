@@ -2,12 +2,15 @@ package dev.unnm3d.redischat.datamanagers.sqlmanagers;
 
 import com.zaxxer.hikari.HikariDataSource;
 import dev.unnm3d.redischat.RedisChat;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.CompletionStage;
 
 public class MySQLDataManager extends SQLDataManager {
     private HikariDataSource dataSource;
@@ -84,6 +87,16 @@ public class MySQLDataManager extends SQLDataManager {
         return dataSource.getConnection();
     }
 
+
+    @Override
+    public void addShulkerBox(@NotNull String name, ItemStack shulkerBox) {
+
+    }
+
+    @Override
+    public CompletionStage<ItemStack> getPlayerShulkerBox(@NotNull String playerName) {
+        return null;
+    }
 
     @Override
     public void close() {
