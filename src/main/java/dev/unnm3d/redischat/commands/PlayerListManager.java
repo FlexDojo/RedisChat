@@ -24,6 +24,7 @@ public class PlayerListManager {
     private final RedisChat plugin;
     private RedisTabAPI redisTabAPI;
 
+
     public PlayerListManager(RedisChat plugin) {
         this.playerList = new ConcurrentHashMap<>();
         this.vanishIntegrations = new ArrayList<>();
@@ -31,26 +32,20 @@ public class PlayerListManager {
         this.task = new BukkitRunnable() {
             @Override
             public void run() {
-                playerList.entrySet().removeIf(stringLongEntry -> System.currentTimeMillis() - stringLongEntry.getValue() > 1000 * 6);
+                playerList.entrySet().removeIf(stringLongEntry -> System.currentTimeMillis() - stringLongEntry.getValue() > 1000 * 4);
 
-                List<String> tempList = new ArrayList<>();
-                plugin.getServer().getOnlinePlayers().stream()
+                List<String> tempList = plugin.getServer().getOnlinePlayers().stream()
+                        //Accept only players that are not vanished in any integration
                         .filter(player -> vanishIntegrations.stream().noneMatch(integration -> integration.isVanished(player)))
                         .map(HumanEntity::getName)
                         .filter(s -> !s.isEmpty())
-                        .forEach(tempList::add);
-                plugin.getDataManager().publishPlayerList(tempList);
+                        .toList();
+                if (!tempList.isEmpty())
+                    plugin.getDataManager().publishPlayerList(tempList);
 
                 tempList.forEach(s -> playerList.put(s, System.currentTimeMillis()));
             }
-        }.runTaskTimerAsynchronously(plugin, 0, 200);//10 seconds
-        loadRedisTabAPI();
-    }
-
-    private void loadRedisTabAPI() {
-        if (Bukkit.getPluginManager().isPluginEnabled("RedisTab")) {
-            redisTabAPI = Bukkit.getServicesManager().load(RedisTabAPI.class);
-        }
+        }.runTaskTimerAsynchronously(plugin, 0, 100);//5 seconds
     }
 
     public void updatePlayerList(List<String> inPlayerList) {

@@ -1,6 +1,6 @@
 package dev.unnm3d.redischat.commands;
 
-import dev.unnm3d.redischat.Permission;
+import dev.unnm3d.redischat.Permissions;
 import dev.unnm3d.redischat.RedisChat;
 import lombok.AllArgsConstructor;
 import org.bukkit.command.Command;
@@ -8,13 +8,11 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.StringJoiner;
 
 @AllArgsConstructor
@@ -56,10 +54,13 @@ public class IgnoreCommand implements CommandExecutor, TabCompleter {
     @Nullable
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
-        if (!sender.hasPermission(Permission.REDIS_CHAT_IGNORE.getPermission())) return List.of();
+        if (!sender.hasPermission(Permissions.IGNORE.getPermission())) return List.of();
         List<String> temp = new ArrayList<>(List.of("list", "all"));
-        Set<String> players = plugin.getPlayerListManager().getPlayers(sender);
-        StringUtil.copyPartialMatches(args[args.length - 1], players, temp);
+        temp.addAll(
+                plugin.getPlayerListManager().getPlayerList()
+                        .stream().filter(s ->
+                                s.toLowerCase().startsWith(args[args.length - 1].toLowerCase())
+                        ).toList());
         return temp;
     }
 }

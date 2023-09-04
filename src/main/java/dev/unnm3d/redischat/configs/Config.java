@@ -22,7 +22,7 @@ public final class Config {
             6379,
             "",
             "",
-            1,
+            0,
             1000,
             "RedisChat");
     public Mysql mysql = new Mysql("127.0.0.1",
@@ -45,6 +45,15 @@ public final class Config {
     public int clusterId = 0;
     @Comment("Webeditor URL")
     public String webEditorUrl = "https://webui.advntr.dev/";
+    @Comment("Enables & (ampersand) and § (section) color codes")
+    public boolean legacyColorCodesSupport = true;
+    @Comment("Enables /rmail /mail and the whole feature")
+    public boolean enableMails = true;
+    @Comment({"Use RedisChat for join and quit messages",
+            "The quit message will be delayed because it might be a early reconnection to one of the servers using RedisChat"})
+    public boolean enableQuitJoinMessages = true;
+    @Comment("Re-enables bukkit color glitches for colored placeholders")
+    public boolean enablePlaceholderGlitch = false;
     @Comment({"Here you can decide your chat format", "Permission format is overridden on descending order", "(if a player has default and vip, if default is the first element, vip will be ignored)"})
     public List<ChatFormat> formats = List.of(new ChatFormat("redischat.default",
             "<click:suggest_command:/msg %player_name%><hover:show_text:'" +
@@ -54,13 +63,10 @@ public final class Config {
                     "'><white>%vault_prefix%%player_displayname%%luckperms_suffix%</click> <dark_gray>» <reset>%message%",
             "<dark_aqua>MSG <white>(<reset>You <white>to <green>%receiver%<white>)<reset>: <white>%message%",
             "<dark_aqua>MSG <white>(<green>%sender% <white>to <reset>You<white>)<reset>: <white>%message%",
-            "<click:run_command:%command%>[Open the inventory of %player%]</click>",
-            "<click:run_command:%command%>[%item_name% of %player%]</click>",
-            "<click:run_command:%command%>[Open the enderchest of %player%]</click>",
-            "<click:run_command:%command%>[Open %shulker_name% of %player%]</click>",
             "<aqua>@%player%</aqua>",
             "<bold><click:open_url:%link%>[Click to open URL (be careful)]</click></bold>",
-            "<gold>StaffChat <dark_gray>» <white>%message%"
+            "<green>%player_name% joined the server",
+            "<red>%player_name% is no longer online"
     ));
     @Comment({
             "Announcer configurations",
@@ -70,19 +76,26 @@ public final class Config {
     })
     public List<Announce> announces = List.of(new Announce("default", "<red>RedisChat Announce: <br><white>lorem ipsum dolor sit amet", "", 5, 300));
     @Comment({"Here you can create your own placeholders", "You can give them an identifier, which will go under the format <>", "You can give them actions, like click url"})
-    public Map<String, String> placeholders = Map.of("discord", "<click:open_url:https://discord.gg/uq6bBqAQ>Click to join our discord server</click>");
+    public Map<String, String> placeholders = Map.of(
+            "discord", "<click:open_url:https://discord.gg/C8d7EqQz>Click to join our discord server</click>",
+            "position", "<white><blue>Server:</blue> %server_name% <aqua>World:</aqua> %player_world% <gold>X:</gold> %player_x% <gold>Y:</gold> %player_y% <gold>Z:</gold> %player_z%</white>");
     @Comment({"Here you can blacklist some terms (like swears, insults and unwanted urls)", "They will be replaced with a *", "You can use the regex syntax and the * wildcard"})
     public List<String> regex_blacklist = List.of("discord.gg/.*");
+    @Comment({"What to replace the blacklisted words with"})
+    public String blacklistReplacement = "<obf>*****</obf>";
     @Comment({"Title of the ShowInventory GUI"})
     public String inv_title = "Inventory of %player%";
     @Comment({"Title of the ShowItem GUI"})
     public String item_title = "Item of %player%";
+    @Comment({"Title of the ShowShulkerBox GUI"})
+    public String shulker_title = "Shulker of %player%";
     @Comment({"Title of the ShowEnderchest GUI"})
     public String ec_title = "Enderchest of %player%";
-    @Comment({"Title of the ShowShulker GUI"})
-    public String shulker_title = "Shulker of %player%";
     @Comment("There are some others chat formats, like broadcast and clear chat messages")
     public String broadcast_format = "<red>Announce <dark_gray>» <white>%message%";
+    @Comment({"This message will be sent when a player logs in for the first time",
+            "Put an empty string \"\" to disable this feature"})
+    public String first_join_message = "<red>Welcome to the server, <white>%player_name%<red>!";
     @Comment("This message will be sent to all players when the chat is cleared")
     public String clear_chat_message = "<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared<br><br><br><br><br><br><br><br><br><br>Chat cleared";
     @Comment("Here you can set the number of messages that a player can send without being rate limited")
@@ -91,21 +104,27 @@ public final class Config {
     public int rate_limit_time_seconds = 5;
     @Comment("Messages with this prefix will be sent to staff chat")
     public String staffChatPrefix = "!";
-    @Comment("Enabling this")
-    public boolean legacyColorCodesSupport = true;
-    @Comment("Re-enables bukkit color glitches for colored placeholders")
-    public boolean enablePlaceholderGlitch = false;
-    @Comment("Enables /rmail /mail and the whole feature")
-    public boolean enableMails = true;
+    @Comment("The format of the staff chat messages")
+    public String staffChatFormat = "<gold>StaffChat </gold> : %message%";
+    @Comment("The discord webhook of the staff chat")
+    public String staffChatDiscordWebhook = "";
+    public String inventoryFormat = "<click:run_command:%command%>[Open the inventory of %player%]</click>";
+    public String itemFormat = "<click:run_command:%command%>[%item_name% of %player%]</click>";
+    public String enderChestFormat = "<click:run_command:%command%>[Open the enderchest of %player%]</click>";
+    @Comment("The discord webhook of the public chat")
+    public String publicDiscordWebhook = "";
     @Comment("The format of the timestamp in mails (by default is like 31/07/2023 15:24)")
     public String mailTimestampFormat = "dd/MM/yyyy HH:mm";
     @Comment("The timezone of the timestamp in mails (by default is Central European Time)")
     public String mailTimestampZone = "UTC+1";
     @Comment("Those commands will be disabled")
     public List<String> disabledCommands = List.of();
+    @Comment("The [inv], [item] and [ec] placeholders will be considered as minimessage tags")
+    public boolean interactiveChatNostalgia = false;
+    @Comment("Reply only to the last player you have messaged")
+    public boolean replyToLastMessaged = false;
     @Comment("Toggle debug mode (by default is false)")
     public boolean debug = false;
-
 
 
     public record RedisSettings(String host, int port, String user, String password, int database, int timeout,
@@ -131,12 +150,12 @@ public final class Config {
     public record Announce(
             String announceName,
             String message,
-            String permission,
+            String channelName,
             int delay,
             int interval) {
     }
 
-    public @NotNull List<ChatFormat> getChatFormats(CommandSender p) {
+    public @NotNull List<ChatFormat> getChatFormats(@NotNull CommandSender p) {
         List<ChatFormat> chatFormatList = formats.stream().filter(format -> p.hasPermission(format.permission())).toList();
         if (chatFormatList.isEmpty()) {
             Bukkit.getLogger().info("No format found for " + p.getName());

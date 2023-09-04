@@ -3,12 +3,11 @@ package dev.unnm3d.redischat.commands;
 import dev.unnm3d.redischat.RedisChat;
 import lombok.AllArgsConstructor;
 import org.bukkit.Material;
-import org.bukkit.block.ShulkerBox;
+import org.bukkit.block.Container;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -41,11 +40,23 @@ public class InvShareCommand implements CommandExecutor {
         switch (type) {
             case ITEM -> plugin.getDataManager().getPlayerItem(playername)
                     .thenAccept(item ->
-                            plugin.getServer().getScheduler().runTask(plugin, () ->
-                                    openInvShareGuiItem(p,
-                                            plugin.config.item_title.replace("%player%", playername),
-                                            item
-                                    )
+                            plugin.getServer().getScheduler().runTask(plugin, () -> {
+                                        if (item.getType().toString().endsWith("SHULKER_BOX")) {
+                                            if (item.getItemMeta() instanceof BlockStateMeta bsm)
+                                                if (bsm.getBlockState() instanceof Container shulkerBox) {
+                                                    openInvShareGui(p,
+                                                            plugin.config.shulker_title.replace("%player%", playername),
+                                                            3,
+                                                            shulkerBox.getSnapshotInventory().getContents()
+                                                    );
+                                                }
+                                        } else {
+                                            openInvShareGuiItem(p,
+                                                    plugin.config.item_title.replace("%player%", playername),
+                                                    item
+                                            );
+                                        }
+                                    }
                             ));
 
 
@@ -67,15 +78,6 @@ public class InvShareCommand implements CommandExecutor {
                                             ecContents
                                     )
                             ));
-            case SHULKER -> plugin.getDataManager().getPlayerShulkerBox(playername)
-                    .thenAccept(shulkerBox ->
-                            plugin.getServer().getScheduler().runTask(plugin, () -> {
-                                ShulkerBox blockStateMeta = (ShulkerBox) ((BlockStateMeta) shulkerBox.getItemMeta()).getBlockState();
-                                openInvShareGui(p,
-                                        plugin.config.shulker_title.replace("%player%", playername),
-                                        3, blockStateMeta.getInventory().getContents()
-                                );
-                            }));
         }
         return true;
     }
@@ -113,8 +115,7 @@ public class InvShareCommand implements CommandExecutor {
     public enum InventoryType {
         INVENTORY,
         ENDERCHEST,
-        ITEM,
-        SHULKER
+        ITEM
     }
 
 }
