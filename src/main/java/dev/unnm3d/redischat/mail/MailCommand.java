@@ -1,18 +1,21 @@
 package dev.unnm3d.redischat.mail;
 
-import dev.unnm3d.redischat.Permission;
+import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.SuggestionInfo;
+import dev.jorel.commandapi.arguments.ArgumentSuggestions;
+import dev.jorel.commandapi.arguments.GreedyStringArgument;
+import dev.jorel.commandapi.arguments.MultiLiteralArgument;
+import dev.jorel.commandapi.arguments.StringArgument;
+import dev.unnm3d.redischat.Permissions;
 import lombok.AllArgsConstructor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 @AllArgsConstructor
 public class MailCommand {
@@ -96,7 +99,7 @@ public class MailCommand {
         return commandSenderSuggestionInfo ->
                 CompletableFuture.supplyAsync(() -> {
                     List<String> list = new ArrayList<>(
-                            mailManager.getPlugin().getPlayerListManager().getPlayerList().stream()
+                            mailManager.getPlugin().getPlayerListManager().getPlayers(commandSenderSuggestionInfo.sender()).stream()
                                     .filter(s -> s.toLowerCase().startsWith(commandSenderSuggestionInfo.currentArg().toLowerCase()))
                                     .toList()
                     );

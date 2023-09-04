@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import xyz.xenondevs.invui.gui.Gui;
@@ -111,6 +112,8 @@ public class InvShareCommand implements CommandExecutor {
             }
         }.runTaskLater(plugin, 1))).open(player);
     }
+
+
 
     public enum InventoryType {
         INVENTORY,

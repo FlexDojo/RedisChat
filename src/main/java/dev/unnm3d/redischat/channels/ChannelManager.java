@@ -110,6 +110,7 @@ public class ChannelManager extends RedisChatAPI {
         if (plugin.config.interactiveChatNostalgia) {
             return message.replace("[inv]", "<inv>")
                     .replace("[item]", "<item>")
+                    .replace("[i]", "<item>")
                     .replace("[ec]", "<ec>");
         }
         return message;
@@ -163,27 +164,27 @@ public class ChannelManager extends RedisChatAPI {
 
         //Call event and check cancellation
         AsyncRedisChatMessageEvent event = new AsyncRedisChatMessageEvent(player, channel, finalFormat, finalMessage);
-        plugin.getServer().getPluginManager().callEvent(event);
-        if (event.isCancelled()) return;
+            plugin.getServer().getPluginManager().callEvent(event);
+            if (event.isCancelled()) return;
 
-        // Send to other servers
-        plugin.getDataManager().sendChatMessage(ChatMessageInfo.craftChannelChatMessage(
-                player.getName(),
-                event.getFormat(),
-                event.getMessage(),
-                event.getChannel().getName()));
+            // Send to other servers
+            plugin.getDataManager().sendChatMessage(ChatMessageInfo.craftChannelChatMessage(
+                    player.getName(),
+                    event.getFormat(),
+                    event.getMessage(),
+                    event.getChannel().getName()));
 
-        // Send to discord via webhook
-        try {
-            sendDiscordMessage(player.getName(), event.getFormat(), event.getMessage(), event.getChannel());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            // Send to discord via webhook
+            try {
+                sendDiscordMessage(player.getName(), event.getFormat(), event.getMessage(), event.getChannel());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
 
-        if (plugin.config.debug) {
-            plugin.getLogger().info("2) Send (Redis): " + (System.currentTimeMillis() - init) + "ms");
-        }
+            if (plugin.config.debug) {
+                plugin.getLogger().info("2) Send (Redis): " + (System.currentTimeMillis() - init) + "ms");
+            }
     }
 
     public void playerChat(Player player, @NotNull final String finalMessage) {

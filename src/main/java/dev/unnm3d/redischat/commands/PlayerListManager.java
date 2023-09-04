@@ -1,5 +1,6 @@
 package dev.unnm3d.redischat.commands;
 
+import com.sun.jna.platform.win32.Winspool;
 import dev.unnm3d.redischat.RedisChat;
 import dev.unnm3d.redischat.api.VanishIntegration;
 import org.bukkit.Bukkit;
@@ -29,6 +30,7 @@ public class PlayerListManager {
         this.playerList = new ConcurrentHashMap<>();
         this.vanishIntegrations = new ArrayList<>();
         this.plugin = plugin;
+        this.redisTabAPI = Bukkit.getServer().getServicesManager().load(RedisTabAPI.class);
         this.task = new BukkitRunnable() {
             @Override
             public void run() {

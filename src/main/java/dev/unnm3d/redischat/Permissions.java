@@ -8,6 +8,7 @@ public enum Permissions {
     IGNORE("redischat.ignore"),
     USE_FORMATTING("redischat.useformatting"),
     USE_ITEM("redischat.showitem"),
+    USE_LEGACY_FORMATTNG_ITEM("redischat.showlegacyitem"),
     USE_INVENTORY("redischat.showinv"),
     USE_ENDERCHEST("redischat.showenderchest"),
     USE_CUSTOM_PLACEHOLDERS("redischat.usecustomplaceholders"),
