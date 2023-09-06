@@ -99,10 +99,12 @@ public class ChannelManager extends RedisChatAPI {
     private String invShareFormatting(CommandSender sender, String message) {
         if (!(sender instanceof Player player)) return message;
 
-        if (plugin.config.interactiveChatNostalgia) {
+        if (plugin.config.allowBracketPlaceholers) {
             message = message.replace("[inv]", "<inv>")
                     .replace("[item]", "<item>")
                     .replace("[i]", "<item>")
+                    .replace("[enderchest]", "<ec>")
+                    .replace("[inventory]", "<inv>")
                     .replace("[ec]", "<ec>");
         }
 

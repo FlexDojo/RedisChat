@@ -119,8 +119,8 @@ public final class Config {
     public String mailTimestampZone = "UTC+1";
     @Comment("Those commands will be disabled")
     public List<String> disabledCommands = List.of();
-    @Comment("The [inv], [item] and [ec] placeholders will be considered as minimessage tags")
-    public boolean interactiveChatNostalgia = false;
+    @Comment("The [inv]/[inventory], [i] / [item] and [ec] / [enderchest] placeholders will be considered as minimessage tags")
+    public boolean allowBracketPlaceholers = true;
     @Comment("Reply only to the last player you have messaged")
     public boolean replyToLastMessaged = false;
     @Comment("Toggle debug mode (by default is false)")
