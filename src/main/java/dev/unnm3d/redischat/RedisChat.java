@@ -72,6 +72,9 @@ public final class RedisChat extends JavaPlugin {
     @Override
     public void onLoad() {
         CommandAPI.onLoad(new CommandAPIBukkitConfig(this).verboseOutput(true));
+
+
+
     }
 
     @Override
@@ -240,10 +243,10 @@ public final class RedisChat extends JavaPlugin {
 
     private void loadCommandAPICommand(CommandAPICommand commandAPICommand) {
 
-        if (config.disabledCommands.contains(commandAPICommand.getName())) {
-            getLogger().warning("Command " + commandAPICommand.getName() + " is disabled in the config.yml file!");
-            return;
-        }
+//        if (config.disabledCommands.contains(commandAPICommand.getName())) {
+//            getLogger().warning("Command " + commandAPICommand.getName() + " is disabled in the config.yml file!");
+//            return;
+//        }
         for (String alias : commandAPICommand.getAliases()) {
             CommandAPI.unregister(alias, true);
         }
