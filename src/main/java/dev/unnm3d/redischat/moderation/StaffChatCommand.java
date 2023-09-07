@@ -18,7 +18,7 @@ public class StaffChatCommand {
         return new CommandAPICommand("staffchat")
                 .withPermission(Permissions.ADMIN_STAFF_CHAT.getPermission())
                 .withAliases("sc", "rdsc", "ssc", "rcsc")
-                .withArguments(new GreedyStringArgument(plugin.config.staffChatGreedyString))
+                .withArguments(new GreedyStringArgument(plugin.config.staffChatSuggestion))
                 .executes((sender, args) -> {
                     List<ChatFormat> chatFormatList = plugin.config.getChatFormats(sender);
                     if (chatFormatList.isEmpty()) return;

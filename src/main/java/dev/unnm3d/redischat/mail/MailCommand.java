@@ -44,7 +44,7 @@ public class MailCommand {
                 .withArguments(
                         new StringArgument(plugin.config.mailStringPlayer)
                                 .replaceSuggestions(ArgumentSuggestions.stringsAsync(getPlayerRecipients())),
-                        new GreedyStringArgument(plugin.config.mailGreedyStringTitle)
+                        new GreedyStringArgument(plugin.config.mailTitleSuggestion)
                                 .replaceSuggestions(ArgumentSuggestions.strings("<aqua>Mail Object/Title</aqua>")))
                 .executesPlayer((sender, args) -> {
                     String recipient = (String) args.get(0);
