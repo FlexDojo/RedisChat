@@ -67,6 +67,15 @@ public class MsgCommand {
                         // remove blacklisted stuff
                         message = plugin.getComponentProvider().sanitize(message);
 
+                        if (plugin.config.allowBracketPlaceholers) {
+                            message = message.replace("[inv]", "<inv>")
+                                    .replace("[item]", "<item>")
+                                    .replace("[i]", "<item>")
+                                    .replace("[enderchest]", "<ec>")
+                                    .replace("[inventory]", "<inv>")
+                                    .replace("[ec]", "<ec>");
+                        }
+
                         //Check inv update
                         if (sender instanceof Player player) {
                             if (message.contains("<inv>")) {
