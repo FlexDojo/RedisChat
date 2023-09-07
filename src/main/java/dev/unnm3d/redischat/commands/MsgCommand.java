@@ -30,7 +30,7 @@ public class MsgCommand {
                                         plugin.getPlayerListManager().getPlayerList(commandSenderSuggestionInfo.sender()).stream()
                                                 .filter(s -> s.toLowerCase().startsWith(commandSenderSuggestionInfo.currentArg().toLowerCase()))
                                                 .toArray(String[]::new))),
-                        new GreedyStringArgument("message"))
+                        new GreedyStringArgument(plugin.config.msgGreedyString))
                 .executes((sender, args) -> {
                     Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                         final String receiverName = (String) args.get(0);
