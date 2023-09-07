@@ -36,8 +36,6 @@ public class PlayerListManager {
                 playerList.entrySet().removeIf(stringLongEntry -> System.currentTimeMillis() - stringLongEntry.getValue() > 1000 * 4);
 
                 List<String> tempList = plugin.getServer().getOnlinePlayers().stream()
-                        //Accept only players that are not vanished in any integration
-                        .filter(player -> vanishIntegrations.stream().noneMatch(integration -> integration.isVanished(player)))
                         .map(HumanEntity::getName)
                         .filter(s -> !s.isEmpty())
                         .toList();
@@ -46,7 +44,7 @@ public class PlayerListManager {
 
                 tempList.forEach(s -> playerList.put(s, System.currentTimeMillis()));
             }
-        }.runTaskTimerAsynchronously(plugin, 0, 100);//5 seconds
+        }.runTaskTimerAsynchronously(plugin, 0, 60);//3 seconds
     }
 
     public void updatePlayerList(List<String> inPlayerList) {
