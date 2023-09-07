@@ -1,6 +1,5 @@
 package dev.unnm3d.redischat.commands;
 
-import com.sun.jna.platform.win32.Winspool;
 import dev.unnm3d.redischat.RedisChat;
 import dev.unnm3d.redischat.api.VanishIntegration;
 import org.bukkit.Bukkit;
@@ -73,7 +72,7 @@ public class PlayerListManager {
         }
     }
 
-    public Set<String> getPlayers(@Nullable CommandSender sender) {
+    public Set<String> getPlayerList(@Nullable CommandSender sender) {
         if (sender == null) {
             Set<String> players = new HashSet<>(redisTabAPI.getTotalPlayers());
             redisTabAPI.getVanishedPlayers().forEach(players::remove);
