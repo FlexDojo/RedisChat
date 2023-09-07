@@ -18,8 +18,6 @@ softdepend:
 loadbefore:
   - CMI
   - CMILib
-  - Essentials
-  - EssentialsChat
 commands:
   redischat-setitem:
     description: Setitem command
